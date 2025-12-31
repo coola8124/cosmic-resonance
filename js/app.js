@@ -28,84 +28,83 @@ class CosmicResonanceApp {
         const loadingScreen = document.getElementById('loading-screen');
         const app = document.getElementById('app');
         
+        if (!loadingScreen || !app) {
+            console.error('加载屏幕或应用容器未找到');
+            return;
+        }
+        
         // 检查关键资源是否加载
         const checkResources = () => {
             const threeLoaded = typeof THREE !== 'undefined';
             const gsapLoaded = typeof gsap !== 'undefined';
             
-            console.log('资源检查:', {
-                THREE: threeLoaded,
-                GSAP: gsapLoaded
-            });
-            
-            if (!threeLoaded) {
-                console.error('Three.js 未加载');
-            }
-            if (!gsapLoaded) {
-                console.error('GSAP 未加载');
-            }
-            
-            return threeLoaded && gsapLoaded;
+            return { threeLoaded, gsapLoaded };
         };
         
-        // 模拟加载过程
+        // 模拟加载过程，但设置最大时间限制
         let progress = 0;
-        let resourcesReady = false;
-        const maxWaitTime = 10000; // 最多等待10秒
+        const maxWaitTime = 5000; // 最多等待5秒
         const startTime = Date.now();
         
         const loadingInterval = setInterval(() => {
-            // 检查资源是否加载完成
-            if (!resourcesReady && checkResources()) {
-                resourcesReady = true;
-                console.log('资源加载完成');
-            }
+            const resources = checkResources();
             
-            // 检查是否超时
-            if (Date.now() - startTime > maxWaitTime) {
-                console.warn('加载超时，强制显示页面');
+            // 检查是否超时（5秒后强制显示）
+            const elapsed = Date.now() - startTime;
+            if (elapsed > maxWaitTime) {
+                console.warn('加载超时（5秒），强制显示页面');
                 clearInterval(loadingInterval);
                 this.hideLoadingScreen();
                 return;
             }
             
-            progress += Math.random() * 15;
-            
-            if (progress >= 100) {
-                progress = 100;
+            // 如果资源已加载且进度达到100，立即显示
+            if (progress >= 100 && (resources.threeLoaded || elapsed > 3000)) {
                 clearInterval(loadingInterval);
-                
-                // 即使资源未加载完成，也显示页面（避免一直转圈）
                 this.hideLoadingScreen();
+                return;
             }
+            
+            progress += Math.random() * 20;
+            if (progress > 100) progress = 100;
             
             const progressBar = document.querySelector('.loading-progress');
             if (progressBar) {
                 progressBar.style.width = progress + '%';
             }
-        }, 200);
+        }, 150);
         
-        // 设置超时保护
+        // 双重超时保护：3秒后强制显示
         setTimeout(() => {
             if (loadingScreen && loadingScreen.style.display !== 'none') {
-                console.warn('加载超时，强制隐藏加载屏幕');
+                console.warn('3秒超时，强制隐藏加载屏幕');
+                clearInterval(loadingInterval);
                 this.hideLoadingScreen();
             }
-        }, maxWaitTime);
+        }, 3000);
     }
     
     hideLoadingScreen() {
         const loadingScreen = document.getElementById('loading-screen');
         const app = document.getElementById('app');
         
-        if (loadingScreen && app) {
-            loadingScreen.style.opacity = '0';
-            setTimeout(() => {
-                loadingScreen.style.display = 'none';
-                app.classList.remove('hidden');
-                this.onAppLoaded();
-            }, 500);
+        if (!loadingScreen || !app) {
+            console.error('无法找到加载屏幕或应用容器');
+            return;
         }
+        
+        console.log('隐藏加载屏幕...');
+        
+        // 立即隐藏，不等待动画
+        loadingScreen.style.opacity = '0';
+        loadingScreen.style.transition = 'opacity 0.3s';
+        
+        setTimeout(() => {
+            loadingScreen.style.display = 'none';
+            app.classList.remove('hidden');
+            console.log('加载屏幕已隐藏，应用已显示');
+            this.onAppLoaded();
+        }, 300);
     }
 
     onAppLoaded() {

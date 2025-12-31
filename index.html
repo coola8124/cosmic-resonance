@@ -5,12 +5,39 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>寰宇回响 - 沉浸式星象互动占卜装置</title>
     <link rel="stylesheet" href="css/style.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js" 
-            onerror="console.error('Three.js加载失败'); window.threeLoadFailed = true;"
-            onload="console.log('Three.js加载成功'); window.threeLoaded = true;"></script>
+    <!-- Three.js - 使用备用CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"
+            onerror="console.error('Three.js CDN1加载失败，尝试备用源'); loadThreeJSBackup();"
+            onload="console.log('Three.js加载成功');"></script>
+    <script>
+        function loadThreeJSBackup() {
+            if (typeof THREE === 'undefined') {
+                const script = document.createElement('script');
+                script.src = 'https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js';
+                script.onerror = () => console.error('Three.js所有CDN都加载失败');
+                document.head.appendChild(script);
+            }
+        }
+    </script>
+    <!-- GSAP -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"
-            onerror="console.error('GSAP加载失败'); window.gsapLoadFailed = true;"
-            onload="console.log('GSAP加载成功'); window.gsapLoaded = true;"></script>
+            onerror="console.error('GSAP加载失败，但继续运行');"
+            onload="console.log('GSAP加载成功');"></script>
+    <!-- 强制超时保护：3秒后强制显示页面 -->
+    <script>
+        // 防止页面一直转圈
+        setTimeout(function() {
+            const loadingScreen = document.getElementById('loading-screen');
+            const app = document.getElementById('app');
+            if (loadingScreen && loadingScreen.style.display !== 'none') {
+                console.warn('强制超时：3秒后强制显示页面');
+                loadingScreen.style.display = 'none';
+                if (app) {
+                    app.classList.remove('hidden');
+                }
+            }
+        }, 3000);
+    </script>
 </head>
 <body>
     <!-- 加载屏幕 -->
